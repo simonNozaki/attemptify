@@ -46,13 +46,18 @@ export class Attempt {
    */
   private async doOnRetry<T>(producer: () => T, another?: () => T): Promise<T> {
     while (this.retryPolicy.canRetry(this.retryContext)) {
+      // TODO add some specific type for attempts(success/failure)
       try {
         return await producer();
       } catch (e) {
-        console.log(
-            `Attempt failed; count => ${this.retryContext.attemptsCount}`,
-        );
-        this.retryContext.updateLastError(e);
+        if (this.retryPolicy.shouldNotRetry(e)) {
+          console.log(`Not retry catching error [${e.name}]`);
+        } else {
+          console.log(
+              `Attempt failed; count => ${this.retryContext.attemptsCount}`,
+          );
+          this.retryContext.updateLastError(e);
+        }
       }
       const delay = this.retryPolicy.getNextDelay();
       console.log(`next waiting ===> ${delay.value}`);
