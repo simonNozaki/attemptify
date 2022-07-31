@@ -1,4 +1,4 @@
-import {Duration, seconds} from 'lib/duration';
+import {Duration, seconds} from '../duration';
 import {RetryContext} from '../retry-context';
 import {RetryPolicy} from './retry-policy';
 import {ErrorConstructor} from './retry-policy';
