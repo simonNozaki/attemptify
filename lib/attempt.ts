@@ -21,10 +21,11 @@ export class Attempt {
   /**
    *
    * @param {Function} producer
-   * @return {Promise<T>}
+   * @return {Promise<T>} Promise
+   * @throws {@link ExhaustedRetryException} when exhausting `producer`
    */
-  async execute<T>(producer: () => T): Promise<T> {
-    return this.doOnRetry(producer);
+  async executeAsync<T>(producer: () => Promise<T>): Promise<T> {
+    return this.doOnRetryAsync(producer);
   }
 
   /**
@@ -33,8 +34,11 @@ export class Attempt {
    * @param {Function} another
    * @return {Promise<T>}
    */
-  async executeOrElse<T>(producer: () => T, another: () => T): Promise<T> {
-    return this.doOnRetry(producer, another);
+  async executeAsyncOrElse<T>(
+      producer: () => Promise<T>,
+      another: () => Promise<T>,
+  ): Promise<T> {
+    return this.doOnRetryAsync(producer, another);
   }
 
   /**
@@ -44,7 +48,10 @@ export class Attempt {
    * @param {Function} another
    * @return {Promise<T>}
    */
-  private async doOnRetry<T>(producer: () => T, another?: () => T): Promise<T> {
+  private async doOnRetryAsync<T>(
+      producer: () => Promise<T>,
+      another?: () => Promise<T>,
+  ): Promise<T> {
     while (this.retryPolicy.canRetry(this.retryContext)) {
       // TODO add some specific type for attempts(success/failure)
       try {
@@ -52,12 +59,12 @@ export class Attempt {
       } catch (e) {
         if (this.retryPolicy.shouldNotRetry(e)) {
           console.log(`Not retry catching error [${e.name}]`);
-        } else {
-          console.log(
-              `Attempt failed; count => ${this.retryContext.attemptsCount}`,
-          );
-          this.retryContext.updateLastError(e);
+          break;
         }
+        console.log(
+            `Attempt failed; count => ${this.retryContext.attemptsCount}`,
+        );
+        this.retryContext.updateLastError(e);
       }
       const delay = this.retryPolicy.getNextDelay();
       console.log(`next waiting ===> ${delay.value}`);
@@ -65,6 +72,57 @@ export class Attempt {
     }
     if (another) {
       return await another();
+    }
+    throw new ExhaustedRetryException('Attempt exhaustetd.');
+  }
+
+  /**
+   * Executing `producer` until exhausting along with `RetryPolicy`.
+   * @param {Function} producer
+   * @return {Promise<T>}
+   * @throws {@link ExhaustedRetryException} when exhausting `producer`.
+   */
+  execute<T>(producer: () => T): T {
+    return this.doOnRetry(producer);
+  }
+
+  /**
+   * Executing `producer` until exhausting along with `RetryPolicy`.
+   * @param {Function} producer
+   * @param {Function} another
+   * @return {Promise<T>}
+   */
+  executeOrElse<T>(producer: () => T, another?: () => T): T {
+    return this.doOnRetry(producer, another);
+  }
+
+  /**
+   * Execute and handle error with retrying.
+   * @param {Function} producer
+   * @param {Function} another
+   * @return {T}
+   */
+  private doOnRetry<T>(producer: () => T, another?: () => T): T {
+    while (this.retryPolicy.canRetry(this.retryContext)) {
+      try {
+        return producer();
+      } catch (e) {
+        if (this.retryPolicy.shouldNotRetry(e)) {
+          console.log(`Not retry catching error [${e.name}]`);
+          break;
+        }
+        console.log(
+            `Attempt failed; count => ${this.retryContext.attemptsCount}`,
+        );
+        this.retryContext.updateLastError(e);
+      }
+      const delay = this.retryPolicy.getNextDelay();
+      this.wait(delay)
+          .then((_) => _)
+          .catch((e) => console.error(`Error occurred on waiting: ${e}`));
+    }
+    if (another) {
+      return another();
     }
     throw new ExhaustedRetryException('Attempt exhaustetd.');
   }
