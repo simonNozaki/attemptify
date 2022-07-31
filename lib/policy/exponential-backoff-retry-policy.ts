@@ -1,6 +1,7 @@
-import {Duration} from 'lib/duration';
+import {Duration, seconds} from 'lib/duration';
 import {RetryContext} from '../retry-context';
 import {RetryPolicy} from './retry-policy';
+import {ErrorConstructor} from './retry-policy';
 
 /**
  * Retry policy: exponential backoff
@@ -8,6 +9,7 @@ import {RetryPolicy} from './retry-policy';
  * Interval duration is: `initialDelay ^ (multiplier - attemptCount)`
  */
 export class ExponentialBackOffRetryPolicy implements RetryPolicy {
+  private errorsNotRetryOn: ErrorConstructor[] = [];
   /**
    * @param {number} _initialDelay
    * @param {number} _maxAttempts
@@ -31,6 +33,34 @@ export class ExponentialBackOffRetryPolicy implements RetryPolicy {
   // eslint-disable-next-line require-jsdoc
   get multiplier(): number {
     return this._multiplier;
+  }
+
+  /**
+   * Creates a new Simple Retry policy with default settings
+   * * interval duration ... 1 second
+   * * max attempts ... 5 times
+   * * multiplier of duration ... 2
+   * @return {RetryPolicy}
+   */
+  static ofDefaults(): RetryPolicy {
+    return new ExponentialBackOffRetryPolicy(seconds(1), 4, 2);
+  }
+
+  /**
+   * Add an error to the list not retrying on it.
+   * @param {Error} e
+   */
+  notRetryOn(e: ErrorConstructor): void {
+    this.errorsNotRetryOn.push(e);
+  }
+
+  /**
+   * Return true if a passed error should not be retryed.
+   * @param {Error} e
+   * @return {boolean}
+   */
+  shouldNotRetry(e: Error): boolean {
+    return this.errorsNotRetryOn.some((v) => e instanceof v);
   }
 
   /**
