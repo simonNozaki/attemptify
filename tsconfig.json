@@ -27,5 +27,5 @@
     "lib/**/*.ts",
     "test/**/*.ts",
     ".eslintrc.js"
-, "lib/when.ts"  ]
+  ]
 }
