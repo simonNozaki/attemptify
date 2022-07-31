@@ -102,3 +102,85 @@ export class ExponentialBackOffRetryPolicy implements RetryPolicy {
     return this.currentDelay;
   }
 }
+
+export namespace ExponentialBackOffRetryPolicy {
+  export const builder = (): ExponentialBackOffRetryPolicy.Builder => {
+    return new Builder();
+  };
+
+  /**
+   * Exponential backoff policy builder
+   */
+  export class Builder {
+    private _initialDelay?: Duration;
+    private _maxAttempts?: number;
+    private _multiplier?: number;
+    private errorsNotRetryOn: ErrorConstructor[] = [];
+
+    /**
+     * Set initial delay duration to builder
+     * @param {Duration} delay
+     * @return {Builder}
+     */
+    initialDelay(delay: Duration): Builder {
+      this._initialDelay = delay;
+      return this;
+    }
+
+    /**
+     * Set max attempts to builder
+     * @param {number} attempts
+     * @return {Builder}
+     */
+    maxAttempts(attempts: number): Builder {
+      this._maxAttempts = attempts;
+      return this;
+    }
+
+    /**
+     * Set multiplier of next delay to builder
+     * @param {number} multiplier
+     * @return {Builder}
+     */
+    multiplier(multiplier: number): Builder {
+      this._multiplier = multiplier;
+      return this;
+    }
+
+    /**
+     * Set an error not retry on to builder
+     * @param {ErrorConstructor} e
+     * @return {Builder}
+     */
+    notRetryOn(e: ErrorConstructor): Builder {
+      this.notRetrysOn([e]);
+      return this;
+    }
+
+    /**
+     * Set an error not retry on to builder
+     * @param {ErrorConstructor[]} constructors
+     * @return {Builder}
+     */
+    notRetrysOn(constructors: ErrorConstructor[]): Builder {
+      constructors.forEach((c) => this.errorsNotRetryOn.push(c));
+      return this;
+    }
+
+    /**
+     * Create new {@link ExponentialBackOffRetryPolicy} with properties.
+     * Properties that is not set will be default settings.
+     * @return {ExponentialBackOffRetryPolicy}
+     */
+    build(): ExponentialBackOffRetryPolicy {
+      const initialDelay = this._initialDelay ? this._initialDelay : seconds(1);
+      const maxAttemps = this._maxAttempts ? this._maxAttempts : 4;
+      const multiplier = this._multiplier ? this._multiplier : 2;
+      const policy =
+        new ExponentialBackOffRetryPolicy(initialDelay, maxAttemps, multiplier);
+      this.errorsNotRetryOn.forEach((e) => policy.notRetryOn(e));
+
+      return policy;
+    }
+  }
+}
