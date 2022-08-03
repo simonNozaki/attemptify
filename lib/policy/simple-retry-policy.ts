@@ -91,3 +91,72 @@ export class SimpleRetryPolicy implements RetryPolicy {
     return this._durationMsec;
   }
 }
+
+export namespace SimpleRetryPolicy {
+  export const newBuilder = (): SimpleRetryPolicy.Builder => {
+    return new SimpleRetryPolicy.Builder();
+  };
+
+  /**
+   * Builder for {@link SimpleRetryPolicy}
+   */
+  export class Builder {
+    private _duration?: Duration;
+    private _maxAttempts?: number;
+    private errorsNotRetryOn: ErrorConstructor[] = [];
+
+    /**
+     * Set duration of interval to builder
+     * @param {Duration} duration
+     * @return {Builder}
+     */
+    duration(duration: Duration): Builder {
+      this._duration = duration;
+      return this;
+    }
+
+    /**
+     * Set max attempts to builder
+     * @param {number} attempts
+     * @return {Builder}
+     */
+    maxAttempts(attempts: number): Builder {
+      this._maxAttempts = attempts;
+      return this;
+    }
+
+    /**
+     * Set an error not retry on to builder
+     * @param {ErrorConstructor} e
+     * @return {Builder}
+     */
+    notRetryOn(e: ErrorConstructor): Builder {
+      this.notRetrysOn([e]);
+      return this;
+    }
+
+    /**
+     * Set an error not retry on to builder
+     * @param {ErrorConstructor[]} constructors
+     * @return {Builder}
+     */
+    notRetrysOn(constructors: ErrorConstructor[]): Builder {
+      constructors.forEach((c) => this.errorsNotRetryOn.push(c));
+      return this;
+    }
+
+    /**
+     * Create new {@link SimpleRetryPolicy} with properties.
+     * Properties that is not set will be default settings.
+     * @return {SimpleRetryPolicy}
+     */
+    build(): SimpleRetryPolicy {
+      const duration = this._duration ? this._duration : seconds(1);
+      const maxAttempts = this._maxAttempts ? this._maxAttempts : 4;
+      const policy = new SimpleRetryPolicy(duration, maxAttempts);
+      this.errorsNotRetryOn.forEach((e) => policy.notRetryOn(e));
+
+      return policy;
+    }
+  }
+}
