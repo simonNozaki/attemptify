@@ -1,5 +1,6 @@
 import {Duration} from './duration';
 import {ExhaustedRetryException} from './exception';
+import {RetryEventLister} from './listener/retry-event-lister';
 import {RetryPolicy} from './policy/retry-policy';
 import {RetryContext} from './retry-context';
 
@@ -16,6 +17,41 @@ export class Attempt {
     private retryPolicy: RetryPolicy,
   ) {
     this.retryContext = new RetryContext();
+  }
+  private requireDebugLogging = false;
+  private retryEventListeners: RetryEventLister[] = [];
+
+  /**
+   * Add retry event listener to this attempt, so that
+   * listening each events
+   * @param {RetryEventLister} retryEventListener
+   * @return {Attempt}
+   */
+  addListener(retryEventListener: RetryEventLister): Attempt {
+    this.addListeners([retryEventListener]);
+    return this;
+  }
+
+  /**
+   * Add some retry event listeners to this attempt.
+   * This stacks listeners, so those subscribe events by popping.
+   * @param {RetryEventLister} retryEventListeners
+   * @return {Attempt} return `this`
+   */
+  addListeners(retryEventListeners: RetryEventLister[]): Attempt {
+    retryEventListeners.forEach((listener) =>
+      this.retryEventListeners.push(listener),
+    );
+    return this;
+  }
+
+  /**
+   * Enable this attempt to debug-log
+   * @return {Attempt}
+   */
+  enableDebugLogging(): Attempt {
+    this.requireDebugLogging = true;
+    return this;
   }
 
   /**
@@ -58,22 +94,43 @@ export class Attempt {
         return await producer();
       } catch (e) {
         if (this.retryPolicy.shouldNotRetry(e)) {
-          console.log(`Not retry catching error [${e.name}]`);
+          this.logDebugIfRequire(
+              this.requireDebugLogging,
+              `Not retry catching error [${e.name}]`,
+          );
           break;
         }
-        console.log(
+        this.retryContext.updateLastError(e);
+        const delay = this.retryPolicy.getNextDelay();
+        this.logDebugIfRequire(
+            this.requireDebugLogging,
             `Attempt failed; count => ${this.retryContext.attemptsCount}`,
         );
-        this.retryContext.updateLastError(e);
+        this.logDebugIfRequire(
+            this.requireDebugLogging,
+            `next waiting ===> ${delay.toMilliSecconds()}`,
+        );
+        await this.wait(delay);
       }
-      const delay = this.retryPolicy.getNextDelay();
-      console.log(`next waiting ===> ${delay.value}`);
-      await this.wait(delay);
     }
     if (another) {
       return await another();
     }
     throw new ExhaustedRetryException('Attempt exhaustetd.');
+  }
+
+  /**
+   *
+   * @param {boolean} requireDebugLogging
+   * @param {string} message
+   */
+  private logDebugIfRequire(
+      requireDebugLogging: boolean,
+      message: string,
+  ): void {
+    if (requireDebugLogging) {
+      console.log(message);
+    }
   }
 
   /**
