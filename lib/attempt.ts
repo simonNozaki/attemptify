@@ -1,4 +1,6 @@
 import {Duration} from './duration';
+import {RetryEventOnFailed} from './event/retry-event-on-failed';
+import {RetryEventOnSuccess} from './event/retry-event-on-success';
 import {ExhaustedRetryException} from './exception';
 import {RetryEventLister} from './listener/retry-event-lister';
 import {RetryPolicy} from './policy/retry-policy';
@@ -43,6 +45,14 @@ export class Attempt {
       this.retryEventListeners.push(listener),
     );
     return this;
+  }
+
+  /**
+   * Return true if this attempt has one or more listeners.
+   * @return {boolean}
+   */
+  hasListener(): boolean {
+    return this.retryEventListeners.length > 0;
   }
 
   /**
@@ -91,14 +101,19 @@ export class Attempt {
     while (this.retryPolicy.canRetry(this.retryContext)) {
       // TODO add some specific type for attempts(success/failure)
       try {
-        return await producer();
+        const result = await producer();
+        this.notifyRetryEventOnSuccess(
+            this.retryEventListeners,
+            this.retryContext,
+        );
+        return result;
       } catch (e) {
         if (this.retryPolicy.shouldNotRetry(e)) {
           this.logDebugIfRequire(
               this.requireDebugLogging,
               `Not retry catching error [${e.name}]`,
           );
-          break;
+          continue;
         }
         this.retryContext.updateLastError(e);
         const delay = this.retryPolicy.getNextDelay();
@@ -109,6 +124,10 @@ export class Attempt {
         this.logDebugIfRequire(
             this.requireDebugLogging,
             `next waiting ===> ${delay.toMilliSecconds()}`,
+        );
+        this.notifyRetryEventOnFailed(
+            this.retryEventListeners,
+            this.retryContext,
         );
         await this.wait(delay);
       }
@@ -162,26 +181,82 @@ export class Attempt {
   private doOnRetry<T>(producer: () => T, another?: () => T): T {
     while (this.retryPolicy.canRetry(this.retryContext)) {
       try {
-        return producer();
+        const result = producer();
+        this.notifyRetryEventOnSuccess(
+            this.retryEventListeners,
+            this.retryContext,
+        );
+        return result;
       } catch (e) {
         if (this.retryPolicy.shouldNotRetry(e)) {
-          console.log(`Not retry catching error [${e.name}]`);
+          this.logDebugIfRequire(
+              this.requireDebugLogging,
+              `Not retry catching error [${e.name}]`,
+          );
           break;
         }
-        console.log(
+        this.logDebugIfRequire(
+            this.requireDebugLogging,
             `Attempt failed; count => ${this.retryContext.attemptsCount}`,
         );
         this.retryContext.updateLastError(e);
+        this.notifyRetryEventOnFailed(
+            this.retryEventListeners,
+            this.retryContext,
+        );
       }
       const delay = this.retryPolicy.getNextDelay();
       this.wait(delay)
           .then((_) => _)
-          .catch((e) => console.error(`Error occurred on waiting: ${e}`));
+          .catch((e) => {
+            this.logDebugIfRequire(
+                this.requireDebugLogging,
+                `Error occurred on waiting: ${e}`,
+            );
+            console.error(`Error occurred on waiting: ${e}`);
+          });
     }
     if (another) {
       return another();
     }
     throw new ExhaustedRetryException('Attempt exhaustetd.');
+  }
+
+  /**
+   * Notify all listeners of a retry event on success.
+   * {@link RetryEventOnSuccess} of message to notify is created from
+   * {@link RetryContext}.
+   * @param {RetryEventLister[]} retryEventListeners
+   * @param {RetryContext} retryContext
+   */
+  private notifyRetryEventOnSuccess(
+      retryEventListeners: RetryEventLister[],
+      retryContext: RetryContext,
+  ): void {
+    for (const listener of retryEventListeners) {
+      const retryEvent = new RetryEventOnSuccess(retryContext.attemptsCount);
+      listener.onSuccess(retryEvent);
+    }
+  }
+
+  /**
+   * Notify all listeners of a retry event on error.
+   * {@link RetryEventOnFailed} of message to notify is created from
+   * {@link RetryContext}.
+   * @param {RetryEventLister[]} retryEventListeners
+   * @param {RetryContext} retryContext
+   */
+  private notifyRetryEventOnFailed(
+      retryEventListeners: RetryEventLister[],
+      retryContext: RetryContext,
+  ): void {
+    for (const listener of retryEventListeners) {
+      const retryEvent = new RetryEventOnFailed(
+          retryContext.attemptsCount,
+          retryContext.lastError,
+      );
+      listener.onFailed(retryEvent);
+    }
   }
 
   /**
