@@ -6,16 +6,19 @@ import {eq, then, when} from './when';
 type DurationUnit = 'milliseconds' | 'seconds' | 'minutes';
 
 /**
- * Get new duration with unit milliseconds
+ * Utility function for {@link Duration}.
+ * Get new duration with unit "milliseconds"
  * @param {number} milliseconds
  * @return {Duration}
+ * @example
  */
 export const msecs = (milliseconds: number): Duration => {
   return Duration.of(milliseconds);
 };
 
 /**
- * Get new duration with unit seconds
+ * Utility function for {@link Duration}.
+ * Get new duration with unit "seconds"
  * @param {number} seconds
  * @return {Duration}
  */
@@ -24,7 +27,8 @@ export const seconds = (seconds: number): Duration => {
 };
 
 /**
- * * Get new duration with unit minutes
+ * Utility function for {@link Duration}.
+ * Get new duration with unit "minutes"
  * @param {number} minutes
  * @return {Duration}
  */
@@ -51,7 +55,7 @@ export class Duration {
   }
 
   /**
-   *
+   * Create {@link Duration} instance with unit "milliseconds".
    * @param {number} milliseconds
    * @return {Duration}
    */
@@ -60,7 +64,7 @@ export class Duration {
   }
 
   /**
-   *
+   * Create {@link Duration} instance with unit "seconds".
    * @param {number} seconds
    * @return {Duration}
    */
@@ -69,7 +73,7 @@ export class Duration {
   }
 
   /**
-   *
+   * Create {@link Duration} instance with unit "minutes".
    * @param {number} minutes
    * @return {Duration}
    */
@@ -90,6 +94,8 @@ export class Duration {
 
   /**
    * Multiply duration and return new `Duration` instance.
+   * {@link DurationUnit} of a new instance of {@link Duration} keep
+   * from an original {@link Duration} instace.
    * @param {number} multiplier
    * @return {Duration}
    */
@@ -104,5 +110,12 @@ export class Duration {
   equals(duration: Duration): boolean {
     return this._value === duration.value &&
       this.durationUnit === duration.durationUnit;
+  }
+
+  /**
+   * @return {string}
+   */
+  toString(): string {
+    return `Duration(value=${this._value}, durationUnit=${this.durationUnit})`;
   }
 }

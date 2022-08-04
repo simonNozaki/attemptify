@@ -11,7 +11,10 @@ export class RetryContext {
   get attemptsCount(): number {
     return this._attemptCount;
   }
-  // eslint-disable-next-line require-jsdoc
+
+  /**
+   * Return Error if a last error is set on this context.
+   */
   get lastError(): Error | null {
     return this._lastError;
   }

@@ -10,4 +10,7 @@ export abstract class AbstractRetryEvent {
   abstract isFailure(): boolean;
 }
 
+/**
+ * Sealed type definition of retry event.
+ */
 export type RetryEvent = RetryEventOnSuccess | RetryEventOnFailed;
