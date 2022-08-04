@@ -65,7 +65,7 @@ export class Attempt {
   }
 
   /**
-   *
+   * Executing `producer` until exhausting along with `RetryPolicy`.
    * @param {Function} producer
    * @return {Promise<T>} Promise
    * @throws {@link ExhaustedRetryException} when exhausting `producer`
@@ -75,7 +75,8 @@ export class Attempt {
   }
 
   /**
-   *
+   * Executing `producer` until exhausting along with `RetryPolicy`.
+   * After exhausted, try to evaluate `another` function.
    * @param {Function} producer
    * @param {Function} another
    * @return {Promise<T>}
@@ -85,6 +86,22 @@ export class Attempt {
       another: () => Promise<T>,
   ): Promise<T> {
     return this.doOnRetryAsync(producer, another);
+  }
+
+  /**
+   * Executing `producer` until exhausting along with `RetryPolicy`.
+   * After exhausted, return default value.
+   * @param {Function} producer
+   * @param {Promise<T>} defaultValue
+   * @return {Promise<T>}
+   */
+  async executeAsyncOrDefault<T>(
+      producer: () => Promise<T>,
+      defaultValue: Promise<T>,
+  ): Promise<T> {
+    return this.doOnRetryAsync(producer, () => {
+      return defaultValue;
+    });
   }
 
   /**
@@ -99,7 +116,6 @@ export class Attempt {
       another?: () => Promise<T>,
   ): Promise<T> {
     while (this.retryPolicy.canRetry(this.retryContext)) {
-      // TODO add some specific type for attempts(success/failure)
       try {
         const result = await producer();
         this.notifyRetryEventOnSuccess(
@@ -170,6 +186,19 @@ export class Attempt {
    */
   executeOrElse<T>(producer: () => T, another?: () => T): T {
     return this.doOnRetry(producer, another);
+  }
+
+  /**
+   * Executing `producer` until exhausting along with `RetryPolicy`.
+   * Return a result of `producer`, or default value when exhausted.
+   * @param {Function} producer Producer function
+   * @param {T} defaultValue Another result when attempt failed
+   * @return {T}
+   */
+  executeOrDefault<T>(producer: () => T, defaultValue: T): T {
+    return this.doOnRetry(producer, () => {
+      return defaultValue;
+    });
   }
 
   /**
