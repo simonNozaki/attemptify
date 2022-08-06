@@ -23,3 +23,32 @@ This retry policy has settings that wait for 1 seconds in interval and max attem
 ```typescript
 new Attempt(simpleRetry).executeAsync(() => (new Application().run()));
 ```
+
+`Attempt` enable log for debug, using `enableDebugLogging`:
+
+```typescript
+new Attempt(simpleRetry)
+    .enableDebugLogging()
+    .executeAsync(() => (new Application().run()));
+```
+
+## Customize retry policy
+### SimpleRetryPolicy
+`RetryPolicy` can customize its policy setting to set some values to constructors:
+
+```typescript
+const simpleRetry = new SimpleRetryPolicy(seconds(1), 3)
+```
+
+The 1st argument of `SimpleRetryPolicy` receive `Duration` instance, passing easily to use `msecs` / `seconds` / `minutes` .
+
+Also, if we want to set a part of settings of policy, a builder is useful. Values that is not set will be defaults.
+
+```typescript
+SimpleRetryPolicy.newBuilder()
+      .duration(seconds(1))
+      .build();
+```
+
+# docs
+All class documents can be seen here: https://simonnozaki.github.io/attemptify/
