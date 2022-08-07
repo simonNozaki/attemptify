@@ -46,14 +46,38 @@ var Application = (function () {
     };
     return Application;
 }());
+var ApplicationRetryEventLitener = (function () {
+    function ApplicationRetryEventLitener() {
+    }
+    ApplicationRetryEventLitener.prototype.onSuccess = function (retryEvent) {
+        console.log("Attempt was success by ".concat(retryEvent.getAttemptCounts(), " times"));
+    };
+    ApplicationRetryEventLitener.prototype.onFailed = function (retryEvent) {
+        if (retryEvent.isFailure()) {
+            console.error("Failed, caught error =>", retryEvent.getLastError());
+        }
+    };
+    ApplicationRetryEventLitener.prototype.onExhausted = function (retryEvent) {
+        throw new Error('Attempt was failed to max attempt');
+    };
+    return ApplicationRetryEventLitener;
+}());
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var simpleRetry, exponentialBackOffRetryPolicy;
+    var simpleRetry, exponentialBackOffRetryPolicy, p;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 simpleRetry = index_1.SimpleRetryPolicy.ofDefaults();
+                index_1.SimpleRetryPolicy.newBuilder()
+                    .duration((0, duration_1.seconds)(1))
+                    .build();
                 exponentialBackOffRetryPolicy = new index_1.ExponentialBackOffRetryPolicy((0, duration_1.msecs)(1000), 4, 2);
-                new index_1.Attempt(simpleRetry).execute(function () { return (new Application().run()); });
+                p = index_1.ExponentialBackOffRetryPolicy.newBuilder()
+                    .maxAttempts(2)
+                    .build();
+                new index_1.Attempt(simpleRetry)
+                    .addListener(new ApplicationRetryEventLitener())
+                    .execute(function () { return (new Application().run()); });
                 return [4, new index_1.Attempt(exponentialBackOffRetryPolicy).executeAsync(function () { return __awaiter(void 0, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             return [2, new Application().run()];

@@ -60,7 +60,7 @@ var ExponentialBackOffRetryPolicy = (function () {
 }());
 exports.ExponentialBackOffRetryPolicy = ExponentialBackOffRetryPolicy;
 (function (ExponentialBackOffRetryPolicy) {
-    ExponentialBackOffRetryPolicy.builder = function () {
+    ExponentialBackOffRetryPolicy.newBuilder = function () {
         return new Builder();
     };
     var Builder = (function () {

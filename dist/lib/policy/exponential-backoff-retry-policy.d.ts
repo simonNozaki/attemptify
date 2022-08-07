@@ -21,7 +21,7 @@ export declare class ExponentialBackOffRetryPolicy implements RetryPolicy {
     getNextDelay(): Duration;
 }
 export declare namespace ExponentialBackOffRetryPolicy {
-    const builder: () => ExponentialBackOffRetryPolicy.Builder;
+    const newBuilder: () => ExponentialBackOffRetryPolicy.Builder;
     class Builder {
         private _initialDelay?;
         private _maxAttempts?;
