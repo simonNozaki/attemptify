@@ -104,7 +104,7 @@ export class ExponentialBackOffRetryPolicy implements RetryPolicy {
 }
 
 export namespace ExponentialBackOffRetryPolicy {
-  export const builder = (): ExponentialBackOffRetryPolicy.Builder => {
+  export const newBuilder = (): ExponentialBackOffRetryPolicy.Builder => {
     return new Builder();
   };
 
