@@ -1,4 +1,5 @@
 import {AbstractRetryEvent} from './retry-event';
+import {RetryEventOnFailed} from './retry-event-on-failed';
 
 /**
  * Retry event implementation on success.
@@ -19,14 +20,14 @@ export class RetryEventOnSuccess implements AbstractRetryEvent {
   /**
    * @return {boolean}
    */
-  isSuccess(): boolean {
+  isSuccess(): this is RetryEventOnSuccess {
     return true;
   }
   /**
    *
    * @return {boolean}
    */
-  isFailure(): boolean {
+  isFailure(): this is RetryEventOnFailed {
     return false;
   }
 }
