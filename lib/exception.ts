@@ -24,5 +24,7 @@ export class ExhaustedRetryException extends Error {
       message?: string,
   ) {
     super(message);
+    this.name = new.target.name;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
