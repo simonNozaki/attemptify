@@ -1,24 +1,13 @@
-import {Attempt} from '../lib/attempt';
-import {seconds} from '../lib/duration';
-import {SimpleRetryPolicy} from '../lib/policy/simple-retry-policy';
-
-class Applicaiton {
-  execute(): Promise<String> {
-    throw new Error();
+// eslint-disable-next-line require-jsdoc
+export class App {
+  // eslint-disable-next-line require-jsdoc
+  execute(): string {
+    return 'test';
+  }
+  // eslint-disable-next-line require-jsdoc
+  executeAsync(): Promise<string> {
+    throw new Promise((resolve) => resolve('test'));
   }
 }
 
-const main = async () => {
-  const policy = SimpleRetryPolicy.newBuilder()
-      .duration(seconds(1))
-      .maxAttempts(2).build();
-  return await new Attempt(policy)
-      .enableDebugLogging()
-      .executeAsync(async () => {
-        return new Applicaiton().execute();
-      });
-};
-
-main()
-    .then((v) => console.log(v))
-    .catch((e) => console.log(e));
+export const app = new App();

@@ -262,10 +262,10 @@ export class Attempt {
       retryEventListeners: RetryEventLister[],
       retryContext: RetryContext,
   ): void {
-    for (const listener of retryEventListeners) {
-      const retryEvent = new RetryEventOnSuccess(retryContext.attemptsCount);
+    const retryEvent = new RetryEventOnSuccess(retryContext.attemptsCount);
+    retryEventListeners.forEach((listener) => {
       listener.onSuccess(retryEvent);
-    }
+    });
   }
 
   /**
@@ -279,13 +279,13 @@ export class Attempt {
       retryEventListeners: RetryEventLister[],
       retryContext: RetryContext,
   ): void {
-    for (const listener of retryEventListeners) {
-      const retryEvent = new RetryEventOnFailed(
-          retryContext.attemptsCount,
-          retryContext.lastError,
-      );
+    const retryEvent = new RetryEventOnFailed(
+        retryContext.attemptsCount,
+        retryContext.lastError,
+    );
+    retryEventListeners.forEach((listener) => {
       listener.onFailed(retryEvent);
-    }
+    });
   }
 
   /**
