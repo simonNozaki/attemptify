@@ -121,7 +121,7 @@ describe('attempt spec', () => {
     expect(listener.lastError).toBeInstanceOf(SpecRetryException);
   });
 
-  it('get default on Exhausted', () => {
+  it('get default on exhausted', () => {
     const policy = new SimpleRetryPolicy(msecs(50), 3);
     const spy = jest.spyOn(App.prototype, 'execute')
         .mockImplementation(() => {
@@ -134,6 +134,64 @@ describe('attempt spec', () => {
               return app.execute();
             },
             'EXHAUSTED',
+        );
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(result).toBe('EXHAUSTED');
+  });
+
+  it('get default on exhausted asynchronously', async () => {
+    const policy = new SimpleRetryPolicy(msecs(50), 3);
+    const spy = jest.spyOn(App.prototype, 'executeAsync')
+        .mockImplementation(() => {
+          throw new SpecRetryException('Error occured on App');
+        });
+    const result = await new Attempt(policy)
+        .enableDebugLogging()
+        .executeAsyncOrDefault(
+            () => {
+              return app.executeAsync();
+            },
+            'EXHAUSTED',
+        );
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(result).toBe('EXHAUSTED');
+  });
+
+  it('should execute another on exhausted asynchronously', async () => {
+    const policy = new SimpleRetryPolicy(msecs(50), 3);
+    const spy = jest.spyOn(App.prototype, 'executeAsync')
+        .mockImplementation(() => {
+          throw new SpecRetryException('Error occured on App');
+        });
+    const result = await new Attempt(policy)
+        .enableDebugLogging()
+        .executeAsyncOrElse(
+            () => {
+              return app.executeAsync();
+            },
+            () => {
+              return new Promise((resolve) => resolve('EXHAUSTED'));
+            },
+        );
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(result).toBe('EXHAUSTED');
+  });
+
+  it('should execute another on exhausted', () => {
+    const policy = new SimpleRetryPolicy(msecs(50), 3);
+    const spy = jest.spyOn(App.prototype, 'execute')
+        .mockImplementation(() => {
+          throw new SpecRetryException('Error occured on App');
+        });
+    const result = new Attempt(policy)
+        .enableDebugLogging()
+        .executeOrElse(
+            () => {
+              return app.execute();
+            },
+            () => {
+              return 'EXHAUSTED';
+            },
         );
     expect(spy).toHaveBeenCalledTimes(3);
     expect(result).toBe('EXHAUSTED');
