@@ -4,7 +4,7 @@ import {RetryPolicy} from './retry-policy';
 import {ErrorConstructor} from './retry-policy';
 
 /**
- * Basic retry policy: wait simply duration milliseconds.
+ * Basic retry policy: wait constant duration milliseconds in this class.
  */
 export class SimpleRetryPolicy implements RetryPolicy {
   private errorsNotRetryOn: ErrorConstructor[] = [];

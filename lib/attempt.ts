@@ -97,10 +97,10 @@ export class Attempt {
    */
   async executeAsyncOrDefault<T>(
       producer: () => Promise<T>,
-      defaultValue: Promise<T>,
+      defaultValue: T,
   ): Promise<T> {
     return this.doOnRetryAsync(producer, () => {
-      return defaultValue;
+      return new Promise((resolve) => resolve(defaultValue));
     });
   }
 
