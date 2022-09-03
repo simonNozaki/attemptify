@@ -1,5 +1,6 @@
-import {Duration, seconds} from '../duration';
-import {RetryContext} from '../retry-context';
+import {Multiplier, multiplierOf} from '../multiplier';
+import {Duration, seconds} from '@/duration';
+import {RetryContext} from '@/retry-context';
 import {RetryPolicy} from './retry-policy';
 import {ErrorConstructor} from './retry-policy';
 
@@ -16,9 +17,9 @@ export class ExponentialBackOffRetryPolicy implements RetryPolicy {
    * @param {number} _multiplier
    */
   constructor(
-    private _initialDelay: Duration,
-    private _maxAttempts: number,
-    private _multiplier: number,
+    private readonly _initialDelay: Duration,
+    private readonly _maxAttempts: number,
+    private readonly _multiplier: Multiplier,
   ) {}
   private currentDelay = this._initialDelay;
 
@@ -31,7 +32,7 @@ export class ExponentialBackOffRetryPolicy implements RetryPolicy {
     return this._maxAttempts;
   }
   // eslint-disable-next-line require-jsdoc
-  get multiplier(): number {
+  get multiplier(): Multiplier {
     return this._multiplier;
   }
 
@@ -43,7 +44,7 @@ export class ExponentialBackOffRetryPolicy implements RetryPolicy {
    * @return {RetryPolicy}
    */
   static ofDefaults(): RetryPolicy {
-    return new ExponentialBackOffRetryPolicy(seconds(1), 4, 2);
+    return new ExponentialBackOffRetryPolicy(seconds(1), 4, multiplierOf(2));
   }
 
   /**
@@ -114,7 +115,7 @@ export namespace ExponentialBackOffRetryPolicy {
   export class Builder {
     private _initialDelay?: Duration;
     private _maxAttempts?: number;
-    private _multiplier?: number;
+    private _multiplier?: Multiplier;
     private errorsNotRetryOn: ErrorConstructor[] = [];
 
     /**
@@ -142,7 +143,7 @@ export namespace ExponentialBackOffRetryPolicy {
      * @param {number} multiplier
      * @return {Builder}
      */
-    multiplier(multiplier: number): Builder {
+    multiplier(multiplier: Multiplier): Builder {
       this._multiplier = multiplier;
       return this;
     }
@@ -175,7 +176,7 @@ export namespace ExponentialBackOffRetryPolicy {
     build(): ExponentialBackOffRetryPolicy {
       const initialDelay = this._initialDelay ? this._initialDelay : seconds(1);
       const maxAttemps = this._maxAttempts ? this._maxAttempts : 4;
-      const multiplier = this._multiplier ? this._multiplier : 2;
+      const multiplier = this._multiplier ? this._multiplier : multiplierOf(2);
       const policy =
         new ExponentialBackOffRetryPolicy(initialDelay, maxAttemps, multiplier);
       this.errorsNotRetryOn.forEach((e) => policy.notRetryOn(e));

@@ -1,4 +1,6 @@
 import {RetryEvent} from 'lib/event/retry-event';
+import {RetryEventOnFailed} from 'lib/event/retry-event-on-failed';
+import {RetryEventOnSuccess} from 'lib/event/retry-event-on-success';
 
 /**
  * Base interface of listener for retry event.
@@ -6,7 +8,7 @@ import {RetryEvent} from 'lib/event/retry-event';
  * receive an instance of {@link RetryEvent}.
  */
 export interface RetryEventLister {
-  onSuccess(retryEvent: RetryEvent): void;
-  onFailed(retryEvent: RetryEvent): void;
+  onSuccess(retryEvent: RetryEventOnSuccess): void;
+  onFailed(retryEvent: RetryEventOnFailed): void;
   onExhausted(retryEvent: RetryEvent): void;
 }
