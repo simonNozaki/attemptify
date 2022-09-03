@@ -1,7 +1,7 @@
 import {Duration} from './duration';
 import {RetryEventOnFailed} from './event/retry-event-on-failed';
 import {RetryEventOnSuccess} from './event/retry-event-on-success';
-import {ExhaustedRetryException} from './exception';
+import {ExhaustedRetryException} from './exception/exhausted-retey-exception';
 import {RetryEventLister} from './listener/retry-event-lister';
 import {RetryPolicy} from './policy/retry-policy';
 import {RetryContext} from './retry-context';
@@ -97,10 +97,10 @@ export class Attempt {
    */
   async executeAsyncOrDefault<T>(
       producer: () => Promise<T>,
-      defaultValue: Promise<T>,
+      defaultValue: T,
   ): Promise<T> {
     return this.doOnRetryAsync(producer, () => {
-      return defaultValue;
+      return new Promise((resolve) => resolve(defaultValue));
     });
   }
 
@@ -127,7 +127,7 @@ export class Attempt {
         if (this.retryPolicy.shouldNotRetry(e)) {
           this.logDebugIfRequire(
               this.requireDebugLogging,
-              `Not retry catching error [${e.name}]`,
+              `Not retry for the error caught: ${e}`,
           );
           continue;
         }
@@ -262,10 +262,10 @@ export class Attempt {
       retryEventListeners: RetryEventLister[],
       retryContext: RetryContext,
   ): void {
-    for (const listener of retryEventListeners) {
-      const retryEvent = new RetryEventOnSuccess(retryContext.attemptsCount);
+    const retryEvent = new RetryEventOnSuccess(retryContext.attemptsCount);
+    retryEventListeners.forEach((listener) => {
       listener.onSuccess(retryEvent);
-    }
+    });
   }
 
   /**
@@ -279,13 +279,13 @@ export class Attempt {
       retryEventListeners: RetryEventLister[],
       retryContext: RetryContext,
   ): void {
-    for (const listener of retryEventListeners) {
-      const retryEvent = new RetryEventOnFailed(
-          retryContext.attemptsCount,
-          retryContext.lastError,
-      );
+    const retryEvent = new RetryEventOnFailed(
+        retryContext.attemptsCount,
+        retryContext.lastError,
+    );
+    retryEventListeners.forEach((listener) => {
       listener.onFailed(retryEvent);
-    }
+    });
   }
 
   /**
