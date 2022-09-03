@@ -8,5 +8,8 @@ module.exports = {
     transform: {
       '^.+\\.(ts|tsx)$': 'ts-jest'
     },
-    testEnvironment: 'node'
+    testEnvironment: 'node',
+    moduleNameMapper: {
+      '^@/(.*)$': '<rootDir>/lib/$1',
+    }
 }

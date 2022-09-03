@@ -1,5 +1,5 @@
-import {Duration} from '../duration';
-import {RetryContext} from '../retry-context';
+import {Duration} from '@/duration';
+import {RetryContext} from '@/retry-context';
 
 export type ErrorConstructor = new (message?: string) => Error;
 

@@ -1,6 +1,6 @@
 import {Multiplier, multiplierOf} from '../multiplier';
-import {Duration, seconds} from '../duration';
-import {RetryContext} from '../retry-context';
+import {Duration, seconds} from '@/duration';
+import {RetryContext} from '@/retry-context';
 import {RetryPolicy} from './retry-policy';
 import {ErrorConstructor} from './retry-policy';
 

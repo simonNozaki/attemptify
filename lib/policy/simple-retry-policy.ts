@@ -1,7 +1,7 @@
-import {Duration, seconds} from '../duration';
-import {RetryContext} from '../retry-context';
-import {RetryPolicy} from './retry-policy';
-import {ErrorConstructor} from './retry-policy';
+import {Duration, seconds} from '@/duration';
+import {RetryContext} from '@/retry-context';
+import {RetryPolicy} from '@/policy/retry-policy';
+import {ErrorConstructor} from '@/policy/retry-policy';
 
 /**
  * Basic retry policy: wait constant duration milliseconds in this class.
