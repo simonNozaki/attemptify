@@ -1,3 +1,4 @@
+import {Multiplier} from './multiplier';
 import {eq, then, when} from './when';
 
 /**
@@ -99,8 +100,8 @@ export class Duration {
    * @param {number} multiplier
    * @return {Duration}
    */
-  multiply(multiplier: number): Duration {
-    return new Duration(this._value * multiplier, this.durationUnit);
+  multiply(multiplier: Multiplier): Duration {
+    return new Duration(this._value * multiplier.value, this.durationUnit);
   }
 
   /**

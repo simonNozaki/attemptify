@@ -1,7 +1,7 @@
 import {Duration} from './duration';
 import {RetryEventOnFailed} from './event/retry-event-on-failed';
 import {RetryEventOnSuccess} from './event/retry-event-on-success';
-import {ExhaustedRetryException} from './exception';
+import {ExhaustedRetryException} from './exception/exhausted-retey-exception';
 import {RetryEventLister} from './listener/retry-event-lister';
 import {RetryPolicy} from './policy/retry-policy';
 import {RetryContext} from './retry-context';
@@ -127,7 +127,7 @@ export class Attempt {
         if (this.retryPolicy.shouldNotRetry(e)) {
           this.logDebugIfRequire(
               this.requireDebugLogging,
-              `Not retry catching error [${e.name}]`,
+              `Not retry for the error caught: ${e}`,
           );
           continue;
         }
