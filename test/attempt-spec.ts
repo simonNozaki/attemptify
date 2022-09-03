@@ -1,6 +1,8 @@
 /* eslint-disable require-jsdoc */
 import {Attempt} from '../lib/attempt';
-import {ExhaustedRetryException} from '../lib/exception';
+import {
+  ExhaustedRetryException,
+} from '../lib/exception/exhausted-retey-exception';
 import {msecs} from '../lib/duration';
 import {SimpleRetryPolicy} from '../lib/policy/simple-retry-policy';
 import {RetryEventLister} from 'lib/listener/retry-event-lister';
@@ -12,7 +14,7 @@ import {SpecRetryException} from './spec-retry-exception';
 
 describe('attempt spec', () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('can retry 3 times', () => {
@@ -195,5 +197,29 @@ describe('attempt spec', () => {
         );
     expect(spy).toHaveBeenCalledTimes(3);
     expect(result).toBe('EXHAUSTED');
+  });
+
+  it('should retry only once and can success', () => {
+    const policy = new SimpleRetryPolicy(msecs(50), 3);
+    // Mock throws error once and return string next.
+    const spy = jest.spyOn(App.prototype, 'execute')
+        .mockImplementationOnce(() => {
+          throw new SpecRetryException('Error occured on App');
+        })
+        .mockImplementationOnce(() => {
+          return 'test';
+        });
+    let result: string;
+    try {
+      result = new Attempt(policy)
+          .enableDebugLogging()
+          .execute(() => {
+            return app.execute();
+          });
+    } catch (e) {
+      // An error souhld not be thrown
+    }
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(result).toBe('test');
   });
 });
