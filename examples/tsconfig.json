@@ -1,0 +1,16 @@
+{
+  "extends": "./../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "rootDirs": [
+      "./",
+      "../lib"
+    ],
+    "paths": {
+      "@core/*": ["../lib/*"]
+    }
+  },
+  "include": [
+    "*.ts"
+  ]
+}
