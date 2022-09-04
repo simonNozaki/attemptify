@@ -7,7 +7,7 @@
   "scripts": {
     "docs": "npx typedoc --out docs index.ts",
     "assemble": "npx tsc",
-    "build": "npx jest && npm run docs && npm run assemble",
+    "build": "npm run test && npm run docs && npm run assemble",
     "test": "node_modules/.bin/jest"
   },
   "author": "",
@@ -29,5 +29,6 @@
     "resilience",
     "resilience4j",
     "spring-retry"
-  ]
+  ],
+  "dependencies": {}
 }

@@ -1,3 +1,4 @@
+import { Multiplier } from './multiplier';
 export declare const msecs: (milliseconds: number) => Duration;
 export declare const seconds: (seconds: number) => Duration;
 export declare const minutes: (minutes: number) => Duration;
@@ -10,7 +11,7 @@ export declare class Duration {
     static ofSeconds(seconds: number): Duration;
     static ofMinutes(minutes: number): Duration;
     toMilliSecconds(): number;
-    multiply(multiplier: number): Duration;
+    multiply(multiplier: Multiplier): Duration;
     equals(duration: Duration): boolean;
     toString(): string;
 }

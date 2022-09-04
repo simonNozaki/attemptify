@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Attempt = void 0;
 var retry_event_on_failed_1 = require("./event/retry-event-on-failed");
 var retry_event_on_success_1 = require("./event/retry-event-on-success");
-var exception_1 = require("./exception");
+var exhausted_retey_exception_1 = require("./exception/exhausted-retey-exception");
 var retry_context_1 = require("./retry-context");
 var Attempt = (function () {
     function Attempt(retryPolicy) {
@@ -84,7 +84,7 @@ var Attempt = (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2, this.doOnRetryAsync(producer, function () {
-                        return defaultValue;
+                        return new Promise(function (resolve) { return resolve(defaultValue); });
                     })];
             });
         });
@@ -107,7 +107,7 @@ var Attempt = (function () {
                     case 3:
                         e_1 = _a.sent();
                         if (this.retryPolicy.shouldNotRetry(e_1)) {
-                            this.logDebugIfRequire(this.requireDebugLogging, "Not retry catching error [".concat(e_1.name, "]"));
+                            this.logDebugIfRequire(this.requireDebugLogging, "Not retry for the error caught: ".concat(e_1));
                             return [3, 0];
                         }
                         this.retryContext.updateLastError(e_1);
@@ -124,7 +124,7 @@ var Attempt = (function () {
                         if (!another) return [3, 8];
                         return [4, another()];
                     case 7: return [2, _a.sent()];
-                    case 8: throw new exception_1.ExhaustedRetryException('Attempt exhaustetd.');
+                    case 8: throw new exhausted_retey_exception_1.ExhaustedRetryException('Attempt exhaustetd.');
                 }
             });
         });
@@ -173,21 +173,19 @@ var Attempt = (function () {
         if (another) {
             return another();
         }
-        throw new exception_1.ExhaustedRetryException('Attempt exhaustetd.');
+        throw new exhausted_retey_exception_1.ExhaustedRetryException('Attempt exhaustetd.');
     };
     Attempt.prototype.notifyRetryEventOnSuccess = function (retryEventListeners, retryContext) {
-        for (var _i = 0, retryEventListeners_1 = retryEventListeners; _i < retryEventListeners_1.length; _i++) {
-            var listener = retryEventListeners_1[_i];
-            var retryEvent = new retry_event_on_success_1.RetryEventOnSuccess(retryContext.attemptsCount);
+        var retryEvent = new retry_event_on_success_1.RetryEventOnSuccess(retryContext.attemptsCount);
+        retryEventListeners.forEach(function (listener) {
             listener.onSuccess(retryEvent);
-        }
+        });
     };
     Attempt.prototype.notifyRetryEventOnFailed = function (retryEventListeners, retryContext) {
-        for (var _i = 0, retryEventListeners_2 = retryEventListeners; _i < retryEventListeners_2.length; _i++) {
-            var listener = retryEventListeners_2[_i];
-            var retryEvent = new retry_event_on_failed_1.RetryEventOnFailed(retryContext.attemptsCount, retryContext.lastError);
+        var retryEvent = new retry_event_on_failed_1.RetryEventOnFailed(retryContext.attemptsCount, retryContext.lastError);
+        retryEventListeners.forEach(function (listener) {
             listener.onFailed(retryEvent);
-        }
+        });
     };
     Attempt.prototype.wait = function (duration) {
         return __awaiter(this, void 0, void 0, function () {

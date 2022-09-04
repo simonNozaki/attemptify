@@ -43,7 +43,7 @@ var Duration = (function () {
             .default((0, when_1.then)(this._value));
     };
     Duration.prototype.multiply = function (multiplier) {
-        return new Duration(this._value * multiplier, this.durationUnit);
+        return new Duration(this._value * multiplier.value, this.durationUnit);
     };
     Duration.prototype.equals = function (duration) {
         return this._value === duration.value &&

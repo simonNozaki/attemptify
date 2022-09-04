@@ -1,7 +1,7 @@
-import { Duration } from '../duration';
-import { RetryContext } from '../retry-context';
-import { RetryPolicy } from './retry-policy';
-import { ErrorConstructor } from './retry-policy';
+import { Duration } from '@/duration';
+import { RetryContext } from '@/retry-context';
+import { RetryPolicy } from '@/policy/retry-policy';
+import { ErrorConstructor } from '@/policy/retry-policy';
 export declare class SimpleRetryPolicy implements RetryPolicy {
     private _durationMsec;
     private _maxAttempts;

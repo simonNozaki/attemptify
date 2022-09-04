@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SimpleRetryPolicy = void 0;
-var duration_1 = require("../duration");
+var duration_1 = require("@/duration");
 var SimpleRetryPolicy = (function () {
     function SimpleRetryPolicy(_durationMsec, _maxAttempts) {
         this._durationMsec = _durationMsec;

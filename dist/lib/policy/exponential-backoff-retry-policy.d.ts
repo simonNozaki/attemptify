@@ -1,17 +1,18 @@
-import { Duration } from '../duration';
-import { RetryContext } from '../retry-context';
+import { Multiplier } from '../multiplier';
+import { Duration } from '@/duration';
+import { RetryContext } from '@/retry-context';
 import { RetryPolicy } from './retry-policy';
 import { ErrorConstructor } from './retry-policy';
 export declare class ExponentialBackOffRetryPolicy implements RetryPolicy {
-    private _initialDelay;
-    private _maxAttempts;
-    private _multiplier;
+    private readonly _initialDelay;
+    private readonly _maxAttempts;
+    private readonly _multiplier;
     private errorsNotRetryOn;
-    constructor(_initialDelay: Duration, _maxAttempts: number, _multiplier: number);
+    constructor(_initialDelay: Duration, _maxAttempts: number, _multiplier: Multiplier);
     private currentDelay;
     get initialDelay(): Duration;
     get maxAttempts(): number;
-    get multiplier(): number;
+    get multiplier(): Multiplier;
     static ofDefaults(): RetryPolicy;
     notRetryOn(e: ErrorConstructor): void;
     shouldNotRetry(e: Error): boolean;
@@ -29,7 +30,7 @@ export declare namespace ExponentialBackOffRetryPolicy {
         private errorsNotRetryOn;
         initialDelay(delay: Duration): Builder;
         maxAttempts(attempts: number): Builder;
-        multiplier(multiplier: number): Builder;
+        multiplier(multiplier: Multiplier): Builder;
         notRetryOn(e: ErrorConstructor): Builder;
         notRetrysOn(constructors: ErrorConstructor[]): Builder;
         build(): ExponentialBackOffRetryPolicy;

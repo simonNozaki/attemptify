@@ -12,7 +12,7 @@ export declare class Attempt {
     enableDebugLogging(): Attempt;
     executeAsync<T>(producer: () => Promise<T>): Promise<T>;
     executeAsyncOrElse<T>(producer: () => Promise<T>, another: () => Promise<T>): Promise<T>;
-    executeAsyncOrDefault<T>(producer: () => Promise<T>, defaultValue: Promise<T>): Promise<T>;
+    executeAsyncOrDefault<T>(producer: () => Promise<T>, defaultValue: T): Promise<T>;
     private doOnRetryAsync;
     private logDebugIfRequire;
     execute<T>(producer: () => T): T;
