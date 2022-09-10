@@ -49,7 +49,7 @@ export class SimpleRetryPolicy implements RetryPolicy {
    */
   equals(retryPolicy: SimpleRetryPolicy): boolean {
     return this._maxAttempts === retryPolicy._maxAttempts &&
-      this._durationMsec === retryPolicy.durationMsec;
+      this._durationMsec.equals(retryPolicy.durationMsec);
   }
   /**
    * @return {string}

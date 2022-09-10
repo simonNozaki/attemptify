@@ -1,15 +1,16 @@
 import {
   ExponentialBackOffRetryPolicy,
-} from '../lib/policy/exponential-backoff-retry-policy';
-import {Attempt} from '../lib/attempt';
-import {Duration, msecs} from '../lib/duration';
+} from '@/policy/exponential-backoff-retry-policy';
+import {Attempt} from '@/attempt';
+import {Duration, msecs} from '@/duration';
 import {
   ExhaustedRetryException,
-} from '../lib/exception/exhausted-retey-exception';
-import {SimpleRetryPolicy} from '../lib/policy/simple-retry-policy';
+} from '@/exception/exhausted-retey-exception';
+import {SimpleRetryPolicy} from '@/policy/simple-retry-policy';
 import {App, app} from './app';
 import {SpecRetryException} from './spec-retry-exception';
-import {multiplierOf} from '../lib/multiplier';
+import {multiplierOf} from '@/multiplier';
+import {get} from '@/functions/operator';
 
 describe('Policy Specs', () => {
   afterEach(() => {
