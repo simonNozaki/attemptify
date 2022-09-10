@@ -1,5 +1,6 @@
 import {Multiplier} from './multiplier';
-import {eq, then, when} from './when';
+import {when} from './when';
+import {eq, get} from '@/functions/operator';
 
 /**
  * Duration unit
@@ -90,7 +91,7 @@ export class Duration {
     return when(this.durationUnit)
         .is(eq('seconds'), () => this._value * 1000)
         .is(eq('minutes'), () => this._value * 60000)
-        .default(then(this._value));
+        .default(get(this._value));
   }
 
   /**

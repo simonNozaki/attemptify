@@ -22,13 +22,3 @@ export const when = <T>(value: T): When<T> => ({
   is: <R>(prediction: (v: T) => boolean, producer: () => R) =>
     prediction(value) ? match<T, R>(producer()) : chain<T, R>(value),
 });
-
-export const then =
-  <T>(value: T) =>
-    (): T =>
-      value;
-
-export const eq =
-  <T>(value1: T) =>
-    (value2: T): boolean =>
-      value1 === value2;
