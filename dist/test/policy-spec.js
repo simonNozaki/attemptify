@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var exponential_backoff_retry_policy_1 = require("../lib/policy/exponential-backoff-retry-policy");
-var attempt_1 = require("../lib/attempt");
-var duration_1 = require("../lib/duration");
-var exhausted_retey_exception_1 = require("../lib/exception/exhausted-retey-exception");
-var simple_retry_policy_1 = require("../lib/policy/simple-retry-policy");
+var exponential_backoff_retry_policy_1 = require("@/policy/exponential-backoff-retry-policy");
+var attempt_1 = require("@/attempt");
+var duration_1 = require("@/duration");
+var exhausted_retey_exception_1 = require("@/exception/exhausted-retey-exception");
+var simple_retry_policy_1 = require("@/policy/simple-retry-policy");
 var app_1 = require("./app");
 var spec_retry_exception_1 = require("./spec-retry-exception");
-var multiplier_1 = require("../lib/multiplier");
+var multiplier_1 = require("@/multiplier");
 describe('Policy Specs', function () {
     afterEach(function () {
         jest.clearAllMocks();

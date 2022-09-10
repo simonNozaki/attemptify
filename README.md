@@ -1,5 +1,5 @@
 # attemptify
-TypeScript retry library.
+TypeScript retry library with no dependencies.
 
 ## Objective
 The aim of this module is to simplify the setup and execution of retries. 

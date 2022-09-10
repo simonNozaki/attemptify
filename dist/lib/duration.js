@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Duration = exports.minutes = exports.seconds = exports.msecs = void 0;
 var when_1 = require("./when");
+var operator_1 = require("@/functions/operator");
 var msecs = function (milliseconds) {
     return Duration.of(milliseconds);
 };
@@ -38,9 +39,9 @@ var Duration = (function () {
     Duration.prototype.toMilliSecconds = function () {
         var _this = this;
         return (0, when_1.when)(this.durationUnit)
-            .is((0, when_1.eq)('seconds'), function () { return _this._value * 1000; })
-            .is((0, when_1.eq)('minutes'), function () { return _this._value * 60000; })
-            .default((0, when_1.then)(this._value));
+            .is((0, operator_1.eq)('seconds'), function () { return _this._value * 1000; })
+            .is((0, operator_1.eq)('minutes'), function () { return _this._value * 60000; })
+            .default((0, operator_1.get)(this._value));
     };
     Duration.prototype.multiply = function (multiplier) {
         return new Duration(this._value * multiplier.value, this.durationUnit);

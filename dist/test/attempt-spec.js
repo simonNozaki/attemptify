@@ -36,12 +36,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var attempt_1 = require("../lib/attempt");
-var exhausted_retey_exception_1 = require("../lib/exception/exhausted-retey-exception");
-var duration_1 = require("../lib/duration");
-var simple_retry_policy_1 = require("../lib/policy/simple-retry-policy");
+var attempt_1 = require("@/attempt");
+var exhausted_retey_exception_1 = require("@/exception/exhausted-retey-exception");
+var duration_1 = require("@/duration");
+var simple_retry_policy_1 = require("@/policy/simple-retry-policy");
 var app_1 = require("./app");
 var spec_retry_exception_1 = require("./spec-retry-exception");
+var operator_1 = require("@/functions/operator");
 describe('attempt spec', function () {
     afterEach(function () {
         jest.resetAllMocks();
@@ -275,6 +276,32 @@ describe('attempt spec', function () {
         }
         expect(spy).toHaveBeenCalledTimes(2);
         expect(result).toBe('test');
+    });
+    it('should success normally and handle retry event', function () {
+        jest.spyOn(app_1.App.prototype, 'execute').mockImplementationOnce(function () { return 'test'; });
+        var AttemptSuccessEventListener = (function () {
+            function AttemptSuccessEventListener() {
+            }
+            AttemptSuccessEventListener.prototype.onSuccess = function (retryEvent) {
+                this.isSuccess = retryEvent.isSuccess();
+                this.attemptCounts = retryEvent.getAttemptCounts();
+            };
+            AttemptSuccessEventListener.prototype.onFailed = function (retryEvent) {
+                throw new Error('Method not implemented.');
+            };
+            AttemptSuccessEventListener.prototype.onExhausted = function (retryEvent) {
+                throw new Error('Method not implemented.');
+            };
+            return AttemptSuccessEventListener;
+        }());
+        var p = simple_retry_policy_1.SimpleRetryPolicy.ofDefaults();
+        var listener = new AttemptSuccessEventListener();
+        var r = new attempt_1.Attempt(p)
+            .addListener(listener)
+            .execute((0, operator_1.get)(app_1.app.execute()));
+        expect(r).toBe('test');
+        expect(listener.isSuccess).toBeTruthy();
+        expect(listener.attemptCounts).toBe(0);
     });
 });
 //# sourceMappingURL=attempt-spec.js.map

@@ -1,16 +1,17 @@
 /* eslint-disable require-jsdoc */
-import {Attempt} from '../lib/attempt';
+import {Attempt} from '@/attempt';
 import {
   ExhaustedRetryException,
-} from '../lib/exception/exhausted-retey-exception';
-import {msecs} from '../lib/duration';
-import {SimpleRetryPolicy} from '../lib/policy/simple-retry-policy';
+} from '@/exception/exhausted-retey-exception';
+import {msecs} from '@/duration';
+import {SimpleRetryPolicy} from '@/policy/simple-retry-policy';
 import {RetryEventLister} from 'lib/listener/retry-event-lister';
 import {RetryEvent} from 'lib/event/retry-event';
 import {App, app} from './app';
 import {RetryEventOnFailed} from 'lib/event/retry-event-on-failed';
 import {RetryEventOnSuccess} from 'lib/event/retry-event-on-success';
 import {SpecRetryException} from './spec-retry-exception';
+import {get} from '@/functions/operator';
 
 describe('attempt spec', () => {
   afterEach(() => {
@@ -221,5 +222,31 @@ describe('attempt spec', () => {
     }
     expect(spy).toHaveBeenCalledTimes(2);
     expect(result).toBe('test');
+  });
+
+  it('should success normally and handle retry event', () => {
+    jest.spyOn(App.prototype, 'execute').mockImplementationOnce(() => 'test');
+    class AttemptSuccessEventListener implements RetryEventLister {
+      isSuccess: boolean;
+      attemptCounts: number;
+      onSuccess(retryEvent: RetryEventOnSuccess): void {
+        this.isSuccess = retryEvent.isSuccess();
+        this.attemptCounts = retryEvent.getAttemptCounts();
+      }
+      onFailed(retryEvent: RetryEventOnFailed): void {
+        throw new Error('Method not implemented.');
+      }
+      onExhausted(retryEvent: RetryEvent): void {
+        throw new Error('Method not implemented.');
+      }
+    }
+    const p = SimpleRetryPolicy.ofDefaults();
+    const listener = new AttemptSuccessEventListener();
+    const r = new Attempt(p)
+        .addListener(listener)
+        .execute(get(app.execute()));
+    expect(r).toBe('test');
+    expect(listener.isSuccess).toBeTruthy();
+    expect(listener.attemptCounts).toBe(0);
   });
 });

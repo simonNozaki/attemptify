@@ -19,7 +19,7 @@ var SimpleRetryPolicy = (function () {
     };
     SimpleRetryPolicy.prototype.equals = function (retryPolicy) {
         return this._maxAttempts === retryPolicy._maxAttempts &&
-            this._durationMsec === retryPolicy.durationMsec;
+            this._durationMsec.equals(retryPolicy.durationMsec);
     };
     SimpleRetryPolicy.prototype.toString = function () {
         return "SimpleRetryPolicy(\n      durationMsec=".concat(this._durationMsec, "), maxAttemps=").concat(this._maxAttempts, "\n    )");
