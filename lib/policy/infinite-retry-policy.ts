@@ -1,4 +1,4 @@
-import {Duration} from '@/duration';
+import {Duration, seconds} from '@/duration';
 import {RetryContext} from '@/retry-context';
 import {ErrorConstructor, RetryPolicy} from './retry-policy';
 
@@ -13,6 +13,13 @@ export class InfiniteRetryPolicy implements RetryPolicy {
   constructor(
     private _duration: Duration,
   ) {}
+  /**
+   * Return the {@link InfiniteRetryPolicy} instance of default settings.
+   * @return {RetryPolicy}
+   */
+  static ofDefaults(): RetryPolicy {
+    return new InfiniteRetryPolicy(seconds(1));
+  }
   /**
    * Return always true to retry infinitely.
    * @param {RetryContext} retryContext

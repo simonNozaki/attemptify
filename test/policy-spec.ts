@@ -10,7 +10,7 @@ import {SimpleRetryPolicy} from '@/policy/simple-retry-policy';
 import {App, app} from './app';
 import {SpecRetryException} from './spec-retry-exception';
 import {multiplierOf} from '@/multiplier';
-import {get} from '@/functions/operator';
+import {InfiniteRetryPolicy} from '@/policy/infinite-retry-policy';
 
 describe('Policy Specs', () => {
   afterEach(() => {
@@ -103,6 +103,27 @@ describe('Policy Specs', () => {
         expect(e).toBeInstanceOf(ExhaustedRetryException);
       }
       expect(spy).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('InfiniteRetryPolicy specs', () => {
+    it('should retry some times', () => {
+      const p = new InfiniteRetryPolicy(msecs(50));
+      const spy = jest.spyOn(App.prototype, 'execute')
+          .mockImplementationOnce(() => {
+            throw new SpecRetryException('Error occurred');
+          })
+          .mockImplementationOnce(() => {
+            throw new SpecRetryException('Error occurred');
+          })
+          .mockImplementationOnce(() => {
+            return 'test';
+          });
+      const result = new Attempt(p).execute(() => {
+        return app.execute();
+      });
+      expect(spy).toHaveBeenCalledTimes(3);
+      expect(result).toBe('test');
     });
   });
 });
