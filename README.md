@@ -38,7 +38,7 @@ This module provides some retry policies - the policy is the strategy for retry.
 
 - `SimpleRetryPolicy` ... simply retrying tomax attempts
 - `ExponentialBackOffRetryPolicy` ... wait interval increases exponentialy
-
+- `InfiniteRetryPolicy` ... retry infinitely until an attempt become success
 
 ## Customize retry policy
 This project provides 2 retry policies: constant retry and exponential backoff.
@@ -86,6 +86,9 @@ const policy = ExponentialBackOffRetryPolicy.newBuilder()
       .maxAttempts(2)
       .build();
 ```
+
+### InfiniteRetryPolicy
+This has no builder, so build it calling constructor or `ofDefaults`.
 
 For all builder settings, see more: [Class Builder](https://simonnozaki.github.io/attemptify/classes/ExponentialBackOffRetryPolicy.Builder.html)
 
